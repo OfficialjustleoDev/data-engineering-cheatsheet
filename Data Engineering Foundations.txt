@@ -1,0 +1,277 @@
+The Role Of A Data Engineer 
+- Gather Data from Different Sources 
+- Optimize database for Analyses
+- Remove corrupt files and repair the data Pipeline
+- Automate tasks and pipelines that store data in suitable format
+
+Definition
+- A type of software engineering that focuses on designing, developing, 
+testing, and maintaining architectures, such as databases and large-scale processing
+
+What skills do Data Engineers need
+- Learn Linux and Command Line
+- Prior Programming expirience in Python, Java or Scala
+- SQL
+- Distributed system, Data ingestion, processing frameworks, storage engines and tools 
+asspciated with each
+
+Essential Tools for Data Engineer
+
+Segmentatiom Tools
+- Database
+- Processing Frameworks
+- Automation Scheduling
+ 
+Tools for Processing Frameworks
+- Spark
+- Hive
+- Flink and Kafka
+
+Automation Scheduling 
+- Set Up and Manage Workflows
+- Plan jobs with Specific Intervals
+- Resolve dependency requirements of jobs 
+- E.g. Airflow, Oozie, Luigi
+
+
+
+Databases and Their Types
+
+What are Databases?
+- A large collection of data organized in efficient structures
+and formats to support rapid search and retrieval
+- Holds Data
+- Organized Data
+- Search data through DBMS
+
+Levels of organisations in Databases
+- Structured Data
+- Semi-Structured Data
+- Unstructured Data
+
+Database Schema
+- A schema describe the structure and relations of the database
+
+SQL: Star Schema
+- Consists of one or more fact tables referecing any number of dimension tables
+
+Major Tasks 
+- Collect Data
+
+How it works
+- Memory 
+- Processing power
+
+Methodology
+- Split tasks into subtasks
+
+Benifits of distributed Computing
+- More Processing Power
+- More Scalable 
+
+Risks of distributed Computing
+- Overhead due to coms of nodes
+- Tasks needs to be large 
+- Need Several processing units 
+
+
+Introduction to Hadoop and MapReduce
+
+Hadoop
+- Is a collection of open-source projects , maintained by Apache
+software foundation
+- Framework for distributed processing of large data sets across clusters of computing
+- Uses the mapruduced algorithm
+- Plays a central role in ETL processing 
+
+Hadoop DFS (Distributed File System) 
+- File reside on different Commputers 
+- Essential part of big data ecosystems
+- Replaced by cloud-managed storage services like GCS and S3
+
+Hadoop MapReduce 
+- Hard to write tasks 
+- Segmentation of tasks 
+
+MapReduce
+- Is a processing technique and a program model for distributed computing
+based on Java
+
+Hive 
+- Data warehouse software project
+- Built on top of Hadoop
+- Hive SQL (structured query language)
+
+Hive SQL
+- Hive gives an SQL-like interface to query data
+- Data extraction from databases and file systems that integrate with Hadoop
+- Earlier, queries had to be implemented in MapReduced java Api
+
+SPARK
+- Distribute Data processing tasks between clusters
+- Processing is done in memory
+- Faster Processing as it avoids disk writes
+- Relies on resilient distributed datasets (RDD) 
+- E.g PySpark, R and Scala
+ 
+Transformations
+- filter
+- Map
+- groupByKey
+- union
+
+Actions 
+- Count
+- First
+- Collect
+- Reduce 
+
+
+Workflows Scheduler Tools 
+
+- Directed Acyclic Graph (DAG), a Collection of all the tasks
+that need to be run, organized in a way that reflects their relationship and dependancies 
+- Set of nodes
+- Directed edges 
+- There are no cycles
+
+Schedular Tools
+- Linux Cron 
+- Spotify Luigi
+- Apache Airflow, tools for discribing, executing and monitoring workflows or pipelines
+- based on DAG
+- Writen in python
+
+
+
+Extracting Data
+Online Transaction Processing (OLTP) 
+- Application Databases- Many transactions
+- Row Oriented 
+- Stored per second 
+
+Online Analytical Processing (OLAP) 
+- Analytical database
+- Aggregate queries- Column Oriented 
+- Parallelization
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------
+
+-- Create a new Database
+CREATE DATABASE etl_pipeline;
+
+-- Connecting to DATABASE
+\c etl_pipeline
+
+-- To Create Tables in the DATABASE
+CREATE TABLE movies (
+id SERIAL PRIMARY KEY,
+name VARCHAR(255),
+category VARCHAR(255) 
+); 
+
+CREATE TABLE users (
+id SERIAL PRIMARY KEY,
+movie_id INTEGER,
+rating INTEGER,
+FOREIGN KEY (movie_id) REFERENCES movies (id) ON DELETE SET null
+); 
+
+-- Check Values in DATABASE
+SELECT * FROM movies; 
+
+-- Copy FIles into our table
+\copy movies FROM "/C:\Users\leoth\Downloads\customers-100.csv" DELIMITER ',' CSV HEADER;
+
+-- Capture All the values from the table
+SELECT * FROM movies
+
+-- Transform this data to get Aggregated insists 
+-- Install Pyspark
+
+-- Import Pyspark
+import pyspark 
+
+-- Create Spark session
+spark = pyspark.sql.SparkSession \ 
+.builder \ 
+.appName("Python Spark SQL basic example") \
+.config('spark.driver.extraClassPath', "C:\Users\leoth\Downloads\postgresql-42.2.18.jar") \
+.getOrCreate()
+
+-- Read table from db using spark jdbc
+movies_df = spark.read \ 
+.format("jdbc")\
+.option("url", "jdbc:postgresql://localhost:5432/etl_pipeline") \
+.option("dbtable", "movies") \ 
+.option("user", "leo") \ 
+.option("password", "root") \ 
+.option("driver", "org.postgresql.Driver") \
+.load()
+
+-- Print the movies_df
+print(movies_df.show())
+
+-- Run script 
+python 04_02.py
+
+
+-- Transforming Tables
+avg_rating = users_df.groupBy("movie_id").mean("rating")
+
+-- Join the movies_df and avg_rating table on id
+df = movies_df.join(avg_rating, movies_df == avg_rating.movie_id)
+
+--Load Transformed datafram to the database 
+
+def load_df_to_db(df):
+    mode = "overwrite"
+    url = "jdbc:postgresql://localhost:5432/etl_pipeline"
+    properties = {
+        "user": "<username>",
+        "password": "<password>",
+        "driver": "org.postgresql.Driver"
+    }
+
+    df.write.jdbc(
+        url=url,
+        table="avg_ratings",
+        mode=mode,
+        properties=properties
+    )
+
+
+if __name__ == "__main__":
+    movies_df = extract_movies_to_df()
+    users_df = extract_users_to_df()
+
+-- pass the dataframes to the transformation function
+    ratings_df = transform_avg_ratings(movies_df, users_df)
+
+-- load the ratings dataframe
+    load_df_to_db(ratings_df)
+
+-- Scheduling EFT Pipeline using Airflow
+-- Setup Airflow
+
+mkdir airflow
+export AIRFLOW_HOME=~/lil/lil_data_engineering/chapter_4/airflow
+sudo install apache-airflow
+airflow db init
+
+-- Create Admin user in Airflow
+airflow users create \ 
+--username admin \
+--firstname Leo \
+--lastname Mahlangu \
+--role Admin \
+--email leothokozanimahlangu@gmail.com
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------
+
