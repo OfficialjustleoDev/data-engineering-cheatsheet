@@ -1,2 +1,29 @@
-# data-engineering-cheatsheet
-Data Engineering Cheatsheet A curated collection of concise notes, examples, and best practices for Data Engineering. Covers core concepts such as SQL, data modeling, ETL/ELT pipelines, data warehousing, orchestration, and cloud fundamentals. Designed as a quick reference for learning, revision, and interview preparation.
+# 📊 Data Engineering Cheatsheet
+
+A quick-reference Data Engineering Cheatsheet covering essential concepts for learning, revision, and interviews.
+
+## 🚀 About
+
+Concise notes and examples focused on practical data engineering fundamentals.
+
+## 🧠 Topics
+
+- SQL & Databases
+
+- Data Modeling
+
+- ETL / ELT Pipelines
+
+- Python & Data Concepts
+
+## 🎯 Who It’s For
+
+Beginners, transitioning engineers, and students.
+
+## 📫 Contact
+
+Leo Mahlangu
+
+LinkedIn: https://www.linkedin.com/in/leo-m-14494a225/
+
+Email: leothokozanimahlangu@gmail.com
